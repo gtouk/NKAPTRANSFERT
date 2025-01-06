@@ -1,5 +1,9 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 import { Button, Col, Container, Form, Row } from 'react-bootstrap';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import { useNavigate } from 'react-router-dom'; // Pour la navigation
 import styled from 'styled-components';
 
 const SignupContainer = styled.div`
@@ -15,8 +19,8 @@ const SignupContainer = styled.div`
     border-color: #16A085;
   }
   .btn-primary:hover {
-    background-color: darken(#16A085, 10%);
-    border-color: darken(#16A085, 10%);
+    background-color: #13856f;
+    border-color: #13856f;
   }
 `;
 
@@ -24,17 +28,55 @@ function Signup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+
+    if (!name || !email || !password || !confirmPassword || !phone) {
+      setError('Tous les champs sont requis.');
       return;
     }
-    // Logique d'inscription ici
-    console.log('Utilisateur inscrit:', { name, email, password });
+
+    if (password !== confirmPassword) {
+      setError('Les mots de passe ne correspondent pas.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await axios.post('http://localhost:3000/api/users/register', {
+        name,
+        email,
+        phone,
+        password,
+        passwordConfirm: confirmPassword, // Correspond à ton backend
+      });
+
+      const { token } = response.data;
+      localStorage.setItem('authToken', token);
+
+      alert('Inscription réussie !');
+      navigate('/'); // Redirige vers la page d'accueil
+    } catch (err) {
+      console.error('Erreur lors de l\'inscription:', err);
+
+      if (err.response) {
+        // Gestion des erreurs backend
+        const errorMessage = err.response.data?.message || 'Erreur lors de l\'inscription.';
+        setError(errorMessage);
+      } else {
+        setError('Impossible de se connecter au serveur. Veuillez réessayer plus tard.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -66,6 +108,20 @@ function Signup() {
                 />
               </Form.Group>
 
+              <Form.Group controlId="formPhone" className="form-group">
+                <Form.Label className="form-label">Téléphone</Form.Label>
+                <PhoneInput
+                  country={'ca'} // Définit un pays par défaut
+                  value={phone}
+                  onChange={(value) => setPhone(value)}
+                  inputClass="form-control" // Ajoute une classe Bootstrap si nécessaire
+                  placeholder="Votre numéro de téléphone"
+                  enableSearch={true} // Permet de rechercher un pays
+                  onlyCountries={['ca']} // Affiche uniquement les pays spécifiés
+                />
+              </Form.Group>
+
+
               <Form.Group controlId="formPassword" className="form-group">
                 <Form.Label className="form-label">Mot de passe</Form.Label>
                 <Form.Control
@@ -90,8 +146,16 @@ function Signup() {
 
               {error && <p className="text-danger">{error}</p>}
 
-              <Button type="submit" variant="primary" className="mt-3">S'inscrire</Button>
+              <Button type="submit" variant="primary" className="mt-3" disabled={loading}>
+                {loading ? 'Chargement...' : "S'inscrire"}
+              </Button>
             </Form>
+
+            <div className="mt-3">
+              <Button variant="link" onClick={() => navigate('/login')}>
+                Déjà un compte ? Connectez-vous
+              </Button>
+            </div>
           </Col>
         </Row>
       </Container>

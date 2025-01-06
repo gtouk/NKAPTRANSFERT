@@ -1,6 +1,5 @@
-// Layout.js
-import React from 'react';
-import { Col, Container, Nav, Navbar, Row } from 'react-bootstrap'; // Import des composants nécessaires
+import React, { useEffect, useState } from 'react';
+import { Button, Col, Container, Nav, Navbar, Row } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useLocation } from 'react-router-dom';
 import '../App.css';
@@ -8,6 +7,35 @@ import '../App.css';
 const Layout = ({ children }) => {
   const { t, i18n } = useTranslation();
   const location = useLocation();
+
+  const [userInfo, setUserInfo] = useState(null);
+  const [contactInfo, setContactInfo] = useState(null);
+  const [openingHours, setOpeningHours] = useState(null);
+  const isAuthenticated = localStorage.getItem('authToken');
+  const handleLogout = () => {
+    localStorage.removeItem('authToken'); // Supprimez le token
+    window.location.href = '/login'; // Redirigez vers la page de connexion
+};
+
+
+  // Récupérer les informations utilisateur depuis l'API backend
+  useEffect(() => {
+    fetch('/api/user')
+      .then(response => response.json())
+      .then(data => setUserInfo(data))
+      .catch(error => console.error('Erreur lors de la récupération des informations utilisateur:', error));
+
+    // Récupérer les informations de contact et horaires depuis l'API
+    fetch('/api/contact-info')
+      .then(response => response.json())
+      .then(data => setContactInfo(data))
+      .catch(error => console.error('Erreur lors de la récupération des informations de contact:', error));
+
+    fetch('/api/opening-hours')
+      .then(response => response.json())
+      .then(data => setOpeningHours(data))
+      .catch(error => console.error('Erreur lors de la récupération des horaires d\'ouverture:', error));
+  }, []);
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
@@ -81,7 +109,7 @@ const Layout = ({ children }) => {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
-                <i className="fas fa-user-circle"></i>
+                {userInfo ? userInfo.username : <i className="fas fa-user-circle"></i>}
               </Nav.Link>
               <Nav.Link as={NavLink} to="/history"
                 onMouseEnter={handleMouseEnter}
@@ -89,12 +117,27 @@ const Layout = ({ children }) => {
               >
                 {t('history')}
               </Nav.Link>
-              <Nav.Link as={NavLink} to="/signup"
+
+              {isAuthenticated ? (
+                <Button variant="danger" onClick={handleLogout}>
+                  {t('Deconnexion')}
+                </Button>
+              ) : (
+                <Nav.Link as={NavLink} to="/signup"
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  {t('signup')}
+                </Nav.Link>
+              )}
+
+
+              {/* <Nav.Link as={NavLink} to="/signup"
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
                 {t('signup')}
-              </Nav.Link>
+              </Nav.Link> */}
               <Nav.Link onClick={swapLanguage}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
@@ -110,7 +153,7 @@ const Layout = ({ children }) => {
         {children}
       </Container>
 
-      {location.pathname === '/contact' && (
+      {location.pathname === '/contact' && contactInfo && openingHours && (
         <footer className="text-white mt-5 p-4 text-center">
           <Container>
             <Row>
@@ -125,19 +168,19 @@ const Layout = ({ children }) => {
                   onMouseEnter={handleMouseEnter}
                   onMouseLeave={handleMouseLeave}
                 >
-                  <i className="fas fa-phone"></i> {t('phone')}
+                  <i className="fas fa-phone"></i> {contactInfo.phone}
                 </p>
                 <p
                   onMouseEnter={handleMouseEnter}
                   onMouseLeave={handleMouseLeave}
                 >
-                  <i className="fas fa-envelope"></i> {t('email')}
+                  <i className="fas fa-envelope"></i> {contactInfo.email}
                 </p>
                 <p
                   onMouseEnter={handleMouseEnter}
                   onMouseLeave={handleMouseLeave}
                 >
-                  <i className="fas fa-map-marker-alt"></i> {t('location')}
+                  <i className="fas fa-map-marker-alt"></i> {contactInfo.location}
                 </p>
               </Col>
               <Col md={8} className="opening-hours">
@@ -147,36 +190,15 @@ const Layout = ({ children }) => {
                 >
                   {t('openingHours')}
                 </h5>
-                <p
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <i className="fas fa-clock"></i> {t('monday')}
-                </p>
-                <p
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <i className="fas fa-clock"></i> {t('tuesday')}
-                </p>
-                <p
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <i className="fas fa-clock"></i> {t('wednesday')}
-                </p>
-                <p
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <i className="fas fa-clock"></i> {t('thursday')}
-                </p>
-                <p
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <i className="fas fa-clock"></i> {t('friday')}
-                </p>
+                {openingHours.map((hour, index) => (
+                  <p
+                    key={index}
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    <i className="fas fa-clock"></i> {hour}
+                  </p>
+                ))}
               </Col>
             </Row>
           </Container>

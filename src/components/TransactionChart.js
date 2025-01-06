@@ -1,12 +1,32 @@
+import axios from 'axios';
 import { CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Tooltip } from 'chart.js';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 
-// Register the components for Chart.js
+// Enregistrer les composants nécessaires pour Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
-const TransactionChart = ({ transactions }) => {
-  // Process transactions data to fit the chart
+const TransactionChart = () => {
+  const [transactions, setTransactions] = useState([]);
+
+  useEffect(() => {
+    // Récupérer les transactions de l'API
+    const fetchTransactions = async () => {
+      try {
+        const token = localStorage.getItem('token');  // Supposons que le token est stocké dans localStorage
+        const response = await axios.get('http://localhost:3000/api/transactions', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setTransactions(response.data);
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
+
+  // Préparer les données pour le graphique
   const labels = transactions.map(tx => `${tx.month}/${tx.year}`);
   const data = transactions.map(tx => tx.amount);
 

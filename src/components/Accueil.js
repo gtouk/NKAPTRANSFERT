@@ -1,274 +1,3 @@
-
-// import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import React, { useEffect, useState } from 'react';
-// import { Button, Col, Container, Form, InputGroup, Row } from 'react-bootstrap';
-// import { useTranslation } from 'react-i18next';
-// import { Link, useNavigate } from 'react-router-dom';
-// import styled from 'styled-components';
-
-// const AccueilContainer = styled.div`
-//   .heading {
-//     color: #16A085;
-//   }
-//   .form-group {
-//     margin-bottom: 1rem;
-//   }
-//   .form-label {
-//     margin-bottom: 0.5rem;
-//     font-weight: bold;
-//   }
-//   .input-group {
-//     display: flex;
-//     align-items: center;
-//   }
-//   .btn-success {
-//     background-color: #16A085;
-//     border-color: #16A085;
-//   }
-//   .btn-success:hover {
-//     background-color: darken(#16A085, 10%);
-//     border-color: darken(#16A085, 10%);
-//   }
-// `;
-
-// const continents = {
-//   'Africa': {
-//     countries: [
-//       { name: 'Côte d\'Ivoire', currency: 'XOF' },
-//       { name: 'Cameroon', currency: 'XAF' },
-//     ],
-//     rates: {
-//       'North America': 1.75, // Taux d'échange exemple
-//       'Europe': 1.20,
-//       // Ajoutez d'autres taux ici
-//     }
-//   },
-//   'North America': {
-//     countries: [
-//       { name: 'Canada', currency: 'CAD' },
-//       { name: 'United States', currency: 'USD' },
-//     ],
-//     rates: {
-//       'Africa': 0.57,
-//       'Europe': 0.68,
-//       // Ajoutez d'autres taux ici
-//     }
-//   },
-//   'Europe': {
-//     countries: [
-//       { name: 'France', currency: 'EUR' },
-//       { name: 'Germany', currency: 'EUR' },
-//     ],
-//     rates: {
-//       'Africa': 0.83,
-//       'North America': 1.47,
-//       // Ajoutez d'autres taux ici
-//     }
-//   },
-//   // Ajoutez plus de continents si nécessaire
-// };
-
-// function Accueil() {
-//   const { t, i18n } = useTranslation();
-//   const [continentFrom, setContinentFrom] = useState('');
-//   const [continentTo, setContinentTo] = useState('');
-//   const [sendCountry, setSendCountry] = useState('');
-//   const [receiveCountry, setReceiveCountry] = useState('');
-//   const [sendCurrency, setSendCurrency] = useState('');
-//   const [receiveCurrency, setReceiveCurrency] = useState('');
-//   const [sendAmount, setSendAmount] = useState(0);
-//   const [receiveAmount, setReceiveAmount] = useState(0);
-//   const [fees, setFees] = useState(0);
-//   const [totalToPay, setTotalToPay] = useState(0);
-
-//   const navigate = useNavigate();
-//   const defaultExchangeRate = 450; // Taux par défaut si aucun taux spécifique n'est fourni
-
-//   useEffect(() => {
-//     if (sendCountry && receiveCountry && continentFrom && continentTo) {
-//       const sendCountryData = continents[continentFrom]?.countries.find(country => country.name === sendCountry);
-//       const receiveCountryData = continents[continentTo]?.countries.find(country => country.name === receiveCountry);
-
-//       if (sendCountryData && receiveCountryData) {
-//         setSendCurrency(sendCountryData.currency);
-//         setReceiveCurrency(receiveCountryData.currency);
-
-//         // Taux de change entre les continents
-//         const continentRate = continents[continentFrom]?.rates[continentTo] || defaultExchangeRate;
-//         setReceiveAmount(sendAmount * continentRate);
-//       } else {
-//         setSendCurrency('');
-//         setReceiveCurrency('');
-//         setReceiveCountry('');
-//       }
-//     }
-//   }, [sendCountry, receiveCountry, continentFrom, continentTo, sendAmount]);
-
-//   useEffect(() => {
-//     const calculatedFees = sendAmount * 0.01;
-//     setFees(calculatedFees);
-//     setTotalToPay(sendAmount + calculatedFees);
-//   }, [sendAmount]);
-
-//   const formatCurrency = (amount, currency) => {
-//     if (!currency) return amount;
-//     try {
-//       const formattedAmount = new Intl.NumberFormat(i18n.language, {
-//         style: 'currency',
-//         currency: currency
-//       }).format(amount);
-
-//       // Ajuster la position de la devise en fonction de la langue
-//       if (i18n.language === 'fr') {
-//         // Pour le français, la devise suit le montant
-//         return formattedAmount.replace(currency, '').trim() + ' ' + currency;
-//       } else {
-//         // Pour l'anglais, la devise précède le montant
-//         return currency + ' ' + formattedAmount.replace(currency, '').trim();
-//       }
-//     } catch (error) {
-//       console.error('Invalid currency code:', currency);
-//       return amount;
-//     }
-//   };
-
-//   const speakText = (text) => {
-//     const synth = window.speechSynthesis;
-//     if (synth.speaking) {
-//       synth.cancel(); // Annuler toute lecture en cours
-//     }
-//     const utterance = new SpeechSynthesisUtterance(text);
-//     utterance.lang = i18n.language === 'fr' ? 'fr-FR' : 'en-US'; // Définir la langue en fonction de la langue actuelle
-//     synth.speak(utterance);
-//   };
-
-//   const handleSubmit = (event) => {
-//     event.preventDefault();
-//     navigate('/transfer'); // Redirection vers la page "Transfert d'argent"
-//   };
-
-//   return (
-//     <AccueilContainer>
-//       <Container className="mt-5">
-//         <Row className="justify-content-center" expand="lg">
-//           <Col md={6}>
-//             <h1 className="display-4 heading" onMouseEnter={() => speakText(t('heading'))}>{t('heading')}</h1>
-//           </Col>
-//           <Col md={6}>
-//             <Form onSubmit={handleSubmit}>
-//               <h2 onMouseEnter={() => speakText(t('estimateTransfer'))}><strong>{t('estimateTransfer')}</strong></h2>
-
-//               <Form.Group controlId="formContinentFrom" className="form-group">
-//                 <Form.Label className="form-label" onMouseEnter={() => speakText(t('continentFromLabel'))}>{t('continentFromLabel')}</Form.Label>
-//                 <Form.Control as="select" value={continentFrom} onChange={(e) => {
-//                   setContinentFrom(e.target.value);
-//                   setSendCountry('');
-//                   setReceiveCountry('');
-//                 }}>
-//                   <option value="">{t('selectContinent')}</option>
-//                   {Object.keys(continents).map((c, index) => (
-//                     <option key={index} value={c}>{c}</option>
-//                   ))}
-//                 </Form.Control>
-//               </Form.Group>
-
-//               <Form.Group controlId="formContinentTo" className="form-group">
-//                 <Form.Label className="form-label" onMouseEnter={() => speakText(t('continentToLabel'))}>{t('continentToLabel')}</Form.Label>
-//                 <Form.Control as="select" value={continentTo} onChange={(e) => {
-//                   setContinentTo(e.target.value);
-//                   setReceiveCountry('');
-//                 }}>
-//                   <option value="">{t('selectContinent')}</option>
-//                   {Object.keys(continents).map((c, index) => (
-//                     <option key={index} value={c}>{c}</option>
-//                   ))}
-//                 </Form.Control>
-//               </Form.Group>
-
-//               <Form.Group controlId="formSendCountry" className="form-group">
-//                 <Form.Label className="form-label" onMouseEnter={() => speakText(t('sendCountryLabel'))}>{t('sendCountryLabel')}</Form.Label>
-//                 <Form.Control as="select" value={sendCountry} onChange={(e) => setSendCountry(e.target.value)}>
-//                   <option value="">{t('selectCountry')}</option>
-//                   {continents[continentFrom]?.countries.map((country, index) => (
-//                     <option key={index} value={country.name}>{country.name}</option>
-//                   ))}
-//                 </Form.Control>
-//               </Form.Group>
-
-//               <Form.Group controlId="formReceiveCountry" className="form-group">
-//                 <Form.Label className="form-label" onMouseEnter={() => speakText(t('sendToLabel'))}>{t('sendToLabel')}</Form.Label>
-//                 <Form.Control as="select" value={receiveCountry} onChange={(e) => setReceiveCountry(e.target.value)}>
-//                   <option value="">{t('selectCountry')}</option>
-//                   {continents[continentTo]?.countries.map((country, index) => (
-//                     <option key={index} value={country.name}>{country.name}</option>
-//                   ))}
-//                 </Form.Control>
-//               </Form.Group>
-
-//               <Form.Group controlId="formSendAmount" className="form-group">
-//                 <Form.Label className="form-label" onMouseEnter={() => speakText(t('sendLabel'))}>{t('sendLabel')}</Form.Label>
-//                 <InputGroup className="input-group">
-//                   <Form.Control
-//                     type="number"
-//                     placeholder="0"
-//                     value={sendAmount}
-//                     onChange={(e) => setSendAmount(parseFloat(e.target.value) || 0)}
-//                   />
-//                   <Form.Control as="select" value={sendCurrency} readOnly>
-//                     <option>{sendCurrency}</option>
-//                   </Form.Control>
-//                 </InputGroup>
-//               </Form.Group>
-
-//               <Form.Group controlId="formReceiveAmount" className="form-group">
-//                 <Form.Label className="form-label" onMouseEnter={() => speakText(t('equivalentLabel'))}>{t('equivalentLabel')}</Form.Label>
-//                 <InputGroup className="input-group">
-//                   <Form.Control
-//                     type="number"
-//                     placeholder="0"
-//                     value={receiveAmount}
-//                     readOnly
-//                   />
-//                   <Form.Control as="select" value={receiveCurrency} readOnly>
-//                     <option>{receiveCurrency}</option>
-//                   </Form.Control>
-//                 </InputGroup>
-//               </Form.Group>
-
-//               <div className="mt-3">
-//                 <p onMouseEnter={() => speakText(t('fees') + ' ' + formatCurrency(fees, sendCurrency))}>{t('fees')} <span className='frais'>{formatCurrency(fees, sendCurrency)}</span></p>
-//                 <p onMouseEnter={() => speakText(t('totalToPay') + ' ' + (sendCountry && receiveCountry
-//                   ? `${formatCurrency(totalToPay, sendCurrency)} / ${formatCurrency(totalToPay / (continents[continentFrom]?.rates[continentTo] || defaultExchangeRate), receiveCurrency)}`
-//                   : formatCurrency(totalToPay, sendCurrency)))}>{t('totalToPay')}
-//                   <span className='total'>
-//                     {sendCountry && receiveCountry
-//                       ? `${formatCurrency(totalToPay, sendCurrency)} / ${formatCurrency(totalToPay / (continents[continentFrom]?.rates[continentTo] || defaultExchangeRate), receiveCurrency)}`
-//                       : formatCurrency(totalToPay, sendCurrency)}
-//                   </span>
-//                 </p>
-//                 <p onMouseEnter={() => speakText(t('exchangeRate') + ' ' + (sendCountry && receiveCountry
-//                   ? `${(continents[continentFrom]?.rates[continentTo] || defaultExchangeRate)}`
-//                   : defaultExchangeRate))}>{t('exchangeRate')} <span className='taux'>{sendCountry && receiveCountry
-//                   ? (continents[continentFrom]?.rates[continentTo] || defaultExchangeRate)
-//                   : defaultExchangeRate}</span></p>
-//               </div>
-
-//               <Link to="/transfer">
-//                 <Button variant="success" className="mt-3 btn-success" onMouseEnter={() => speakText(t('transferButton'))}>
-//                   {t('transferButton')} <FontAwesomeIcon icon={faArrowRight} className="ms-2" />
-//                 </Button>
-//               </Link>
-
-//             </Form>
-//           </Col>
-//         </Row>
-//       </Container>
-//     </AccueilContainer>
-//   );
-// }
-
-// export default Accueil;
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useEffect, useState } from 'react';
@@ -348,9 +77,19 @@ function Accueil() {
   const [receiveAmount, setReceiveAmount] = useState(0);
   const [fees, setFees] = useState(0);
   const [totalToPay, setTotalToPay] = useState(0);
+  const [userName, setUserName] = useState('');
 
   const navigate = useNavigate();
   const defaultExchangeRate = 450;
+
+  useEffect(() => {
+    //recuperer le nom de l'utilisateur depuis le local storage
+    const storedUserName = localStorage.getItem('userName');
+    if (storedUserName) {
+      setUserName(storedUserName);
+      console.log('Nom d\'utilisateur récupéré:', storedUserName);
+    }
+  }, []);
 
   useEffect(() => {
     if (sendCountry && receiveCountry && continentFrom && continentTo) {
@@ -413,7 +152,9 @@ function Accueil() {
 
   return (
     <AccueilContainer>
+
       <Container className="mt-5">
+        <h1 className="display-4 heading">Bienvenue, {userName ? userName: 'Utilisateur'}</h1>
         <Row className="justify-content-center" expand="lg">
           <Col md={6}>
             <h1

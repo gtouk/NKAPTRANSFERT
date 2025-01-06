@@ -1,32 +1,61 @@
 import { faCheckCircle, faLock, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import axios from 'axios'; // for making API requests
 import 'bootstrap/dist/css/bootstrap.min.css';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Card, Col, Container, Nav, Row } from 'react-bootstrap';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 function Profil() {
   const [activeTab, setActiveTab] = useState('personal');
+  const [userInfo, setUserInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const history = useNavigate();
+
+  useEffect(() => {
+    // Fetch user profile data on component mount
+    axios.get('/api/users/profile', { withCredentials: true })  // Assuming JWT is sent with cookies
+      .then(response => {
+        setUserInfo(response.data);
+        setLoading(false);
+      })
+      .catch(error => {
+        setError('Failed to load profile data.');
+        setLoading(false);
+        if (error.response && error.response.status === 401) {
+          // Redirect to login page if not authenticated
+          Navigate('/login');
+        }
+      });
+  }, [history]);
 
   const renderContent = () => {
-    if (activeTab === 'personal') {
+    if (loading) {
+      return <p>Loading...</p>;
+    }
+    if (error) {
+      return <p>{error}</p>;
+    }
+    if (activeTab === 'personal' && userInfo) {
       return (
         <Card className="card-custom">
           <Card.Body>
             <Row>
               <Col md={6}>
                 <h5><FontAwesomeIcon icon={faUser} className="me-2" /> Informations personnelles</h5>
-                <p><strong>Nom:</strong> John Doe</p>
-                <p><strong>Pays:</strong> Canada</p>
+                <p><strong>Nom:</strong> {userInfo.name}</p>
+                <p><strong>Pays:</strong> {userInfo.country}</p>
                 <p><strong>Statut du compte:</strong> <FontAwesomeIcon icon={faCheckCircle} style={{ color: 'green' }} /></p>
-                <p><strong>Email:</strong> johndoe@example.com</p>
-                <p><strong>Téléphone:</strong> +1 234 5678</p>
-                <p><strong>Adresse complète:</strong> 123 Rue Principale, Ville, Pays</p>
+                <p><strong>Email:</strong> {userInfo.email}</p>
+                <p><strong>Téléphone:</strong> {userInfo.phone}</p>
+                <p><strong>Adresse complète:</strong> {userInfo.address}</p>
               </Col>
             </Row>
           </Card.Body>
         </Card>
       );
-    } else if (activeTab === 'security') {
+    } else if (activeTab === 'security' && userInfo) {
       return (
         <Card className="card-custom">
           <Card.Body>
@@ -34,8 +63,7 @@ function Profil() {
               <Col md={6}>
                 <h5><FontAwesomeIcon icon={faLock} className="me-2" /> Connexion et sécurité</h5>
                 <p><strong>Mot de passe:</strong> <a href="#change-password">Nouveau mot de passe (6 caractères minimum)</a></p>
-                <p><strong>Type de compte:</strong> Personnel</p>
-                {/* Ajoutez d'autres champs au besoin */}
+                <p><strong>Type de compte:</strong> {userInfo.accountType}</p>
               </Col>
             </Row>
           </Card.Body>

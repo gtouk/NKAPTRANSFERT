@@ -1,5 +1,6 @@
 import { faInfoCircle, faMoneyBillWave } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Button, Col, Form, InputGroup, Row } from 'react-bootstrap';
 import './Style/Facture.css';
@@ -7,7 +8,7 @@ import './Style/Facture.css';
 const countryCurrencyMap = {
   Canada: { currency: 'CAD', receiveCountry: 'cameroun' },
   cameroun: { currency: 'XAF', receiveCountry: 'Canada' },
-  'Cote d\'ivoire': { currency: 'XOF', receiveCountry: 'France' }, // Exemple fictif, ajustez selon votre besoin
+  'Cote d\'ivoire': { currency: 'XOF', receiveCountry: 'France' },
 };
 
 function Facture() {
@@ -59,7 +60,28 @@ function Facture() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // Handle form submission logic here
+
+    // Rassembler les données du formulaire
+    const formData = {
+      name: event.target.formName.value,
+      phone: event.target.formPhone.value,
+      email: event.target.formEmail.value,
+      country: country,
+      sendAmount: sendAmount,
+      currency: currency,
+      details: event.target.formDetails.value,
+    };
+
+    // Envoi des données au backend via POST
+    axios.post('/api/facture', formData)
+      .then((response) => {
+        console.log('Réponse du serveur :', response.data);
+        // Afficher un message de succès ou rediriger l'utilisateur, etc.
+      })
+      .catch((error) => {
+        console.error('Erreur lors de l\'envoi des données :', error);
+        // Afficher un message d'erreur à l'utilisateur
+      });
   };
 
   return (
