@@ -60,10 +60,10 @@ function Signup() {
       });
 
       const { token } = response.data;
-      localStorage.setItem('authToken', token);
+      // localStorage.setItem('authToken', token);
 
       alert('Inscription réussie !');
-      navigate('/'); // Redirige vers la page d'accueil
+      navigate('/home'); // Redirige vers la page d'accueil
     } catch (err) {
       console.error('Erreur lors de l\'inscription:', err);
 

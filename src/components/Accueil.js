@@ -32,43 +32,28 @@ const AccueilContainer = styled.div`
   }
 `;
 
-const continents = {
-  'Africa': {
+const countries = {
+  'SendingCountry': {
     countries: [
-      { name: 'Côte d\'Ivoire', currency: 'XOF' },
-      { name: 'Cameroon', currency: 'XAF' },
+      {name: 'Canada', currency: 'CAD'}
     ],
     rates: {
-      'North America': 1.75,
-      'Europe': 1.20,
+      'ReceivingCountry': 445
     }
   },
-  'North America': {
+  'ReceivingCountry': {
     countries: [
-      { name: 'Canada', currency: 'CAD' },
-      { name: 'United States', currency: 'USD' },
+      {name: 'cameroun', currency: 'XAF'},
+      {name: 'Côte d\'Ivoire', currency: 'XOF'},
     ],
     rates: {
-      'Africa': 0.57,
-      'Europe': 0.68,
-    }
-  },
-  'Europe': {
-    countries: [
-      { name: 'France', currency: 'EUR' },
-      { name: 'Germany', currency: 'EUR' },
-    ],
-    rates: {
-      'Africa': 0.83,
-      'North America': 1.47,
+      'SendingCountry': 440
     }
   },
 };
 
 function Accueil() {
   const { t, i18n } = useTranslation();
-  const [continentFrom, setContinentFrom] = useState('');
-  const [continentTo, setContinentTo] = useState('');
   const [sendCountry, setSendCountry] = useState('');
   const [receiveCountry, setReceiveCountry] = useState('');
   const [sendCurrency, setSendCurrency] = useState('');
@@ -78,6 +63,7 @@ function Accueil() {
   const [fees, setFees] = useState(0);
   const [totalToPay, setTotalToPay] = useState(0);
   const [userName, setUserName] = useState('');
+  const [userId, setUserId] = useState('');
 
   const navigate = useNavigate();
   const defaultExchangeRate = 450;
@@ -89,32 +75,41 @@ function Accueil() {
       setUserName(storedUserName);
       console.log('Nom d\'utilisateur récupéré:', storedUserName);
     }
+
+    //recuperer l'id de l'utilisateur depuis le local storage
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      setUserId(userId);
+      console.log('ID de l\'utilisateur récupéré:', userId);
+    }
   }, []);
 
+
+
   useEffect(() => {
-    if (sendCountry && receiveCountry && continentFrom && continentTo) {
-      const sendCountryData = continents[continentFrom]?.countries.find(country => country.name === sendCountry);
-      const receiveCountryData = continents[continentTo]?.countries.find(country => country.name === receiveCountry);
-
-      if (sendCountryData && receiveCountryData) {
-        setSendCurrency(sendCountryData.currency);
-        setReceiveCurrency(receiveCountryData.currency);
-
-        const continentRate = continents[continentFrom]?.rates[continentTo] || defaultExchangeRate;
-        setReceiveAmount(sendAmount * continentRate);
+    if (receiveCountry) {
+      const receiveCountryData = countries.ReceivingCountry.countries.find(
+        (country) => country.name === receiveCountry
+      );
+  
+      if (receiveCountryData) {
+        setReceiveCurrency(
+          receiveCountry === 'cameroun' ? 'XAF' : 'XOF'
+        );
+        setReceiveAmount(sendAmount * (countries.ReceivingCountry.rates.SendingCountry || defaultExchangeRate));
       } else {
         setSendCurrency('');
         setReceiveCurrency('');
         setReceiveCountry('');
       }
     }
-  }, [sendCountry, receiveCountry, continentFrom, continentTo, sendAmount]);
+  }, [sendCountry, receiveCountry, sendAmount]);
 
-  useEffect(() => {
-    const calculatedFees = sendAmount * 0.01;
-    setFees(calculatedFees);
-    setTotalToPay(sendAmount + calculatedFees);
-  }, [sendAmount]);
+  // useEffect(() => {
+  //   const calculatedFees = sendAmount * 0.01;
+  //   setFees(calculatedFees);
+  //   setTotalToPay(sendAmount + calculatedFees);
+  // }, [sendAmount]);
 
   const formatCurrency = (amount, currency) => {
     if (!currency) return amount;
@@ -191,7 +186,7 @@ function Accueil() {
               >
                 <strong>{t('estimateTransfer')}</strong>
               </h2>
-
+{/* 
               <Form.Group controlId="formContinentFrom" className="form-group">
                 <Form.Label
                   className="form-label"
@@ -239,7 +234,7 @@ function Accueil() {
                     <option key={index} value={c}>{c}</option>
                   ))}
                 </Form.Control>
-              </Form.Group>
+              </Form.Group> */}
 
               <Form.Group controlId="formSendCountry" className="form-group">
                 <Form.Label
@@ -255,10 +250,11 @@ function Accueil() {
                   onChange={(e) => setSendCountry(e.target.value)}
                   aria-label={t('sendCountryLabel')}
                 >
-                  <option value="">{t('selectCountry')}</option>
-                  {continents[continentFrom]?.countries.map((country, index) => (
+                  {/* <option value="">{t('selectCountry')}</option> */}
+                  {<option value="Canada">Canada</option>}
+                  {/* {continents[continentFrom]?.countries.map((country, index) => (
                     <option key={index} value={country.name}>{country.name}</option>
-                  ))}
+                  ))} */}
                 </Form.Control>
               </Form.Group>
 
@@ -277,9 +273,12 @@ function Accueil() {
                   aria-label={t('sendToLabel')}
                 >
                   <option value="">{t('selectCountry')}</option>
-                  {continents[continentTo]?.countries.map((country, index) => (
+                  {countries.ReceivingCountry.countries.map((country, index) => (
                     <option key={index} value={country.name}>{country.name}</option>
                   ))}
+                  {/* {continents[continentTo]?.countries.map((country, index) => (
+                    <option key={index} value={country.name}>{country.name}</option>
+                  ))} */}
                 </Form.Control>
               </Form.Group>
 
@@ -294,13 +293,12 @@ function Accueil() {
                 <InputGroup className="input-group">
                   <Form.Control
                     type="number"
-                    placeholder="0"
                     value={sendAmount}
-                    onChange={(e) => setSendAmount(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => setSendAmount(parseFloat(e.target.value))}
                     aria-label={t('sendAmountLabel')}
                   />
-                  <Form.Control as="select" value={sendCurrency} readOnly aria-label={t('sendCurrencyLabel')}>
-                    <option>{sendCurrency}</option>
+                  <Form.Control  value='CAD' readOnly aria-label={t('sendCurrencyLabel')}>
+                    {/* <option>{sendCurrency}</option> */}
                   </Form.Control>
                 </InputGroup>
               </Form.Group>
@@ -316,13 +314,12 @@ function Accueil() {
                 <InputGroup className="input-group">
                   <Form.Control
                     type="number"
-                    placeholder="0"
                     value={receiveAmount}
                     readOnly
                     aria-label={t('receiveAmountLabel')}
                   />
                   <Form.Control as="select" value={receiveCurrency} readOnly aria-label={t('receiveCurrencyLabel')}>
-                    <option>{receiveCurrency}</option>
+                    <option value={receiveCurrency}>{receiveCurrency}</option>
                   </Form.Control>
                 </InputGroup>
               </Form.Group>
@@ -333,29 +330,29 @@ function Accueil() {
                 </p>
                 <p
                   onMouseEnter={() => speakText(t('totalToPay') + ' ' + (sendCountry && receiveCountry
-                    ? `${formatCurrency(totalToPay, sendCurrency)} / ${formatCurrency(totalToPay / (continents[continentFrom]?.rates[continentTo] || defaultExchangeRate), receiveCurrency)}`
+                    ? `${formatCurrency(totalToPay, sendCurrency)} / ${formatCurrency(totalToPay / (countries.ReceivingCountry.rates.SendingCountry || defaultExchangeRate), receiveCurrency)}`
                     : formatCurrency(totalToPay, sendCurrency)))}
                   aria-label={t('totalToPay') + ' ' + (sendCountry && receiveCountry
-                    ? `${formatCurrency(totalToPay, sendCurrency)} / ${formatCurrency(totalToPay / (continents[continentFrom]?.rates[continentTo] || defaultExchangeRate), receiveCurrency)}`
+                    ? `${formatCurrency(totalToPay, sendCurrency)} / ${formatCurrency(totalToPay / (countries.SendingCountry.rates.ReceivingCountry || defaultExchangeRate), receiveCurrency)}`
                     : formatCurrency(totalToPay, sendCurrency))}
                 >
                   {t('totalToPay')}
                   <span className='total'>
                     {sendCountry && receiveCountry
-                      ? `${formatCurrency(totalToPay, sendCurrency)} / ${formatCurrency(totalToPay / (continents[continentFrom]?.rates[continentTo] || defaultExchangeRate), receiveCurrency)}`
+                      ? `${formatCurrency(totalToPay, sendCurrency)} / ${formatCurrency(totalToPay / (countries.ReceivingCountry.rates.SendingCountry || defaultExchangeRate), receiveCurrency)}`
                       : formatCurrency(totalToPay, sendCurrency)}
                   </span>
                 </p>
                 <p
                   onMouseEnter={() => speakText(t('exchangeRate') + ' ' + (sendCountry && receiveCountry
-                    ? `${(continents[continentFrom]?.rates[continentTo] || defaultExchangeRate)}`
+                    ? `${(countries.ReceivingCountry.rates.SendingCountry || defaultExchangeRate)}`
                     : defaultExchangeRate))}
                   aria-label={t('exchangeRate') + ' ' + (sendCountry && receiveCountry
-                    ? `${(continents[continentFrom]?.rates[continentTo] || defaultExchangeRate)}`
+                    ? `${(countries.ReceivingCountry.rates.SendingCountry || defaultExchangeRate)}`
                     : defaultExchangeRate)}
                 >
-                  {t('exchangeRate')} <span className='taux'>{sendCountry && receiveCountry
-                    ? (continents[continentFrom]?.rates[continentTo] || defaultExchangeRate)
+                  {t('exchangeRate')} <span className='taux'>{receiveCountry
+                    ? (countries.ReceivingCountry.rates.SendingCountry || defaultExchangeRate)
                     : defaultExchangeRate}</span>
                 </p>
               </div>

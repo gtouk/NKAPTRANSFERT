@@ -14,7 +14,7 @@ const TransactionChart = () => {
     const fetchTransactions = async () => {
       try {
         const token = localStorage.getItem('token');  // Supposons que le token est stocké dans localStorage
-        const response = await axios.get('http://localhost:3000/api/transactions', {
+        const response = await axios.get('http://localhost:3000/api/transactions/get-transactions', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setTransactions(response.data);
@@ -27,7 +27,13 @@ const TransactionChart = () => {
   }, []);
 
   // Préparer les données pour le graphique
-  const labels = transactions.map(tx => `${tx.month}/${tx.year}`);
+  const labels = transactions.map(tx => {
+    const date = new Date(tx.transaction_date);
+    const month = date.getMonth() + 1; // Les mois commencent à 0, donc ajouter 1
+    const year = date.getFullYear();
+    return `${month}/${year}`;
+  });
+
   const data = transactions.map(tx => tx.amount);
 
   const dataChart = {

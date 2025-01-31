@@ -17,6 +17,7 @@ import ResetPassword from './components/ResetPassword';
 import Signup from './components/SignUp';
 import TransactionHistory from './components/TransactionHistory';
 import Transfer from './components/Transfer';
+import AddAdmin from './components/admin/AddAdmin';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -37,10 +38,11 @@ function App() {
     <Router>
       <Layout>
         <Routes>
-          <Route path="/" element={<Accueil />} />
+          <Route path="/home" element={<Accueil />} />
           <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/mot-de-passe-oublie" component={ForgotPassword} />
           <Route path="/reset-password/:token" component={ResetPassword} />
+          <Route path="/add-admin" element={<AddAdmin />} />
           
           
           {/* Regrouper toutes les routes protégées sous PrivateRoute */}

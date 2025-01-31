@@ -81,7 +81,7 @@ const Layout = ({ children }) => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
-              <Nav.Link as={NavLink} to="/" end
+              <Nav.Link as={NavLink} to="/home" end
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >

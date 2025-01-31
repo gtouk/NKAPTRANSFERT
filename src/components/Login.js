@@ -46,16 +46,29 @@ function Login({ onLoginSuccess }) {
         password,
       });
 
-      const { message, accessToken, refreshToken, name } = response.data;
+      const { message, token, refreshToken, name, role, id } = response.data;
+
+
 
       // Stocker les tokens dans localStorage ou dans un state management sécurisé
-      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('token', token);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('userName', name);
+      localStorage.setItem('role', role);
+      localStorage.setItem('email', email);
+      localStorage.setItem('id', id);
 
       alert(message || 'Connexion réussie !');
       onLoginSuccess(); // Mettre à jour l'état d'authentification si nécessaire
-      navigate('/'); // Redirection vers la page d'accueil
+      // navigate('/'); // Redirection vers la page d'accueil
+      if (role === 'admin') {
+        navigate('/add-admin');
+      } else if (role === 'user'){
+        navigate('/home');
+      }else{
+        navigate('/');
+      }
+
     } catch (err) {
       let errorMessage = "Erreur lors de la connexion.";
 

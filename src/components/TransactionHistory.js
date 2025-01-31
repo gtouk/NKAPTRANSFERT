@@ -1,6 +1,6 @@
-import axios from 'axios'; // Importer axios
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Col, Container, Row } from 'react-bootstrap';
+import { Col, Container, Row, Table } from 'react-bootstrap';
 import TransactionChart from './TransactionChart';
 
 const TransactionHistory = () => {
@@ -11,19 +11,15 @@ const TransactionHistory = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const token = localStorage.getItem('token');  // Récupérer le token JWT dans localStorage
+        const token = localStorage.getItem('token');
         if (!token) {
           throw new Error('No token found, please log in.');
         }
 
-        // Effectuer la requête API pour récupérer les transactions
-        const response = await axios.get('http://localhost:3000/api/transactions', {
-          headers: {
-            Authorization: `Bearer ${token}`  // Passer le token JWT dans l'entête de la requête
-          }
+        const response = await axios.get('http://localhost:3000/api/transactions/get-transactions', {
+          headers: { Authorization: `Bearer ${token}` }
         });
 
-        // Mettre à jour les transactions dans le state
         setTransactions(response.data);
       } catch (error) {
         setError(error.message || 'Error fetching transactions');
@@ -48,6 +44,24 @@ const TransactionHistory = () => {
       <Row>
         <Col>
           <h2>Historique des Transactions</h2>
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>Destinataire</th>
+                <th>Montant</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.map((transaction, index) => (
+                <tr key={index}>
+                  <td>{transaction.recipient_name}</td>
+                  <td>{transaction.amount} $</td>
+                  <td>{new Date(transaction.transaction_date).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
           <TransactionChart transactions={transactions} />
         </Col>
       </Row>
