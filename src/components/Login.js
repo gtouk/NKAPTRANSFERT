@@ -43,7 +43,7 @@ function Login({ onLoginSuccess }) {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:3000/api/users/login', {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/users/login`, {
         email,
         password,
       });

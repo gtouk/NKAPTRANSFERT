@@ -14,7 +14,7 @@ const TransactionChart = () => {
     const fetchTransactions = async () => {
       try {
         const token = localStorage.getItem('token');  // Supposons que le token est stocké dans localStorage
-        const response = await axios.get('http://localhost:3000/api/transactions/get-transactions', {
+        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/transactions/get-transactions`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setTransactions(response.data);

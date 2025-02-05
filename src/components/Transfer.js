@@ -476,7 +476,7 @@ const handleChange = (event) => {
     
         try {
           const response = await fetch(
-            'http://localhost:3000/api/transactions/send-email',{
+            `${process.env.REACT_APP_BACKEND_URL}/api/transactions/send-email`,{
             method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -509,7 +509,7 @@ const handleChange = (event) => {
           // Appeler une API pour enregistrer la transaction (optionnel si nécessaire)
           // console.log('userId', localStorage.getItem('userId'));
           await axios.post(
-            'http://localhost:3000/api/transactions/transactions', {
+            `${process.env.REACT_APP_BACKEND_URL}/api/transactions/transactions`, {
               headers: {
                 'contentType': 'application/json',
                 Authorization: `Bearer ${localStorage.getItem('token')}`, // Passer le token JWT dans l'entête de la requête

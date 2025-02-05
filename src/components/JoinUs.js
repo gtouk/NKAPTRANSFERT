@@ -46,7 +46,7 @@ function JoinUs() {
     if (!validateForm()) return;
 
     try {
-      const response = await axios.post('http://localhost:3000/api/transactions/send-mail', formData, {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/transactions/send-mail`, formData, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}` // Si vous utilisez l'authentification

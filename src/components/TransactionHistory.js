@@ -16,7 +16,7 @@ const TransactionHistory = () => {
           throw new Error('No token found, please log in.');
         }
 
-        const response = await axios.get('http://localhost:3000/api/transactions/get-transactions', {
+        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/transactions/get-transactions`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 

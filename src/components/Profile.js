@@ -20,7 +20,7 @@ function Profile() {
   useEffect(() => {
     // // Fetch user profile data on component mount
     const token = localStorage.getItem('token');
-    axios.get('http://localhost:3000/api/users/profile', {  // Assuming JWT is sent with cookies
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/users/profile`, {  // Assuming JWT is sent with cookies
     headers: {
       Authorization: `Bearer ${token}`  // Add token to headers
     }
@@ -50,7 +50,7 @@ function Profile() {
     const token = localStorage.getItem('token');
 
     // Envoyer la requête au backend pour changer le mot de passe
-  axios.post('http://localhost:3000/api/users/update-password', {
+  axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/users/update-password`, {
       oldPassword,
       newPassword, confirmNewPassword
     },     

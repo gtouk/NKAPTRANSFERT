@@ -13,7 +13,7 @@ function AddAdmin() {
         try {
             const token = localStorage.getItem('token'); // Token du super admin
             const response = await axios.post(
-                'http://localhost:3000/users/register',
+                `${process.env.REACT_APP_BACKEND_URL}/users/register`,
                 { email, password },
                 { headers: { Authorization: token } }
             );

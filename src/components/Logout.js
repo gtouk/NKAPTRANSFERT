@@ -12,7 +12,7 @@ const LogoutButton = () => {
         const token = localStorage.getItem('token');
         try {
             const response = await axios.post(
-                'http://localhost:3000/api/users/logout', 
+                `${process.env.REACT_APP_BACKEND_URL}/api/users/logout`, 
                 { token }, // Les données vont ici
                 {
                     headers: {
