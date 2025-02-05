@@ -3,21 +3,24 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useState } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Account from './components/Account';
-import Accueil from './components/Accueil';
+import AddAdmin from './components/admin/AddAdmin';
 import Facture from './components/Facture';
 import ForgotPassword from './components/ForgotPassword';
-import Joindre from './components/Join';
+import Home from './components/Home';
+import JoinUs from './components/JoinUs';
 import Layout from './components/Layout';
 import Login from './components/Login';
+import LogoutButton from './components/Logout';
 import PrivateRoute from './components/PrivateRoute';
-import Profil from './components/Profil';
+import Profile from './components/Profile';
 import Recipients from './components/Recipients';
 import ReferAFriend from './components/ReferAFriend';
 import ResetPassword from './components/ResetPassword';
 import Signup from './components/SignUp';
 import TransactionHistory from './components/TransactionHistory';
 import Transfer from './components/Transfer';
-import AddAdmin from './components/admin/AddAdmin';
+import { AuthProvider } from './contexts/AuthContext';
+
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -35,22 +38,24 @@ function App() {
 
 
   return (
-    <Router>
+
+    <Router>      
+    <AuthProvider>
       <Layout>
         <Routes>
-          <Route path="/home" element={<Accueil />} />
-          <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess}/>} />
           <Route path="/mot-de-passe-oublie" component={ForgotPassword} />
           <Route path="/reset-password/:token" component={ResetPassword} />
           <Route path="/add-admin" element={<AddAdmin />} />
           
           
           {/* Regrouper toutes les routes protégées sous PrivateRoute */}
-          <Route element={<PrivateRoute isAuthenticated={isAuthenticated}/>}>
+          <Route element={<PrivateRoute/>}>
             <Route path="/transfer" element={<Transfer />} />
             <Route path="/pay" element={<Facture />} />
-            <Route path="/contact" element={<Joindre />} />
-            <Route path="/profile" element={<Profil />} />
+            <Route path="/contact" element={<JoinUs />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/history" element={<TransactionHistory />} />
             <Route path="/recipients" element={<Recipients />} />
             <Route path="/account" element={<Account />} />
@@ -58,10 +63,14 @@ function App() {
           </Route>
 
           {/* Route pour l'inscription */}
+          {/* <Route path="/logout" element={<LogoutButton/>}/> */}
+          <Route path="/logout" element={<LogoutButton />} />
           <Route path="/signup" element={<Signup />} />
         </Routes>
       </Layout>
+    </AuthProvider>
     </Router>
+
   );
 }
 

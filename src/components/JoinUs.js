@@ -1,11 +1,12 @@
 import { faChevronDown, faEnvelope, faMapMarkerAlt, faPhone } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useState } from 'react';
-import { Accordion, Button, Container } from 'react-bootstrap';
+import { Accordion, Alert, Button, Container } from 'react-bootstrap';
 import './Style/Joindre.css';
 
-function Joindre() {
+function JoinUs() {
   const [activeKey, setActiveKey] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -14,6 +15,8 @@ function Joindre() {
     message: ''
   });
   const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const toggleFAQ = (key) => {
     setActiveKey(activeKey === key ? null : key);
@@ -38,11 +41,27 @@ function Joindre() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (validateForm()) {
-      // Handle form submission (e.g., send to backend)
-      console.log('Form Submitted', formData);
+    if (!validateForm()) return;
+
+    try {
+      const response = await axios.post('http://localhost:3000/api/transactions/send-mail', formData, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}` // Si vous utilisez l'authentification
+        }
+      });
+
+      if (response.data.success) {
+        setSuccessMessage('Votre message a été envoyé avec succès !');
+        setErrorMessage('');
+        setFormData({ name: '', email: '', subject: '', message: '' }); // Réinitialiser le formulaire
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi du message:', error);
+      setErrorMessage('Erreur lors de l\'envoi du message. Veuillez réessayer.');
+      setSuccessMessage('');
     }
   };
 
@@ -53,6 +72,8 @@ function Joindre() {
           <div className="row">
             <div className="col-md-6">
               <h2>Contactez Nous</h2>
+              {successMessage && <Alert variant="success">{successMessage}</Alert>}
+              {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label>Nom</label>
@@ -102,7 +123,6 @@ function Joindre() {
                   />
                   {errors.message && <small className="text-danger">{errors.message}</small>}
                 </div>
-                {/* Add reCAPTCHA widget here */}
                 <Button type="submit" className="btn btn-success">
                   <FontAwesomeIcon icon={faEnvelope} className="me-2" />
                   Envoyer
@@ -112,7 +132,7 @@ function Joindre() {
             <div className="col-md-6">
               <div className="contact-info">
                 <h4><FontAwesomeIcon icon={faEnvelope} className="me-2" /> Adresse Email</h4>
-                <p>Joe@NKAP.com</p>
+                <p>toukamdyvan@gmail.com</p>
                 <h4><FontAwesomeIcon icon={faPhone} className="me-2" /> Numéro de téléphone</h4>
                 <p>+1 488 546 8936</p>
                 <h4><FontAwesomeIcon icon={faMapMarkerAlt} className="me-2" /> Saint-Constant</h4>
@@ -124,7 +144,7 @@ function Joindre() {
         <div className="row mt-5">
           <div className="col-12">
             <h2>FAQ</h2>
-            <Accordion activeKey={activeKey} flush> 
+            <Accordion activeKey={activeKey} flush>
               <Accordion.Item eventKey="0" onClick={() => toggleFAQ("0")}>
                 <Accordion.Header>
                   Est-ce qu'il y a des frais pour faire des transferts d'argent?
@@ -134,7 +154,6 @@ function Joindre() {
                   Non, il n'y a pas de frais pour faire des transferts d'argent. Les frais varient en fonction du montant envoyé et du pays de destination.
                 </Accordion.Body>
               </Accordion.Item>
-
               <Accordion.Item eventKey="1" onClick={() => toggleFAQ("1")}>
                 <Accordion.Header>
                   Quelles sont les méthodes valides pour faire des transferts d'argent? (E-transfer, chèque, etc)
@@ -144,7 +163,6 @@ function Joindre() {
                   Vous pouvez utiliser plusieurs méthodes pour faire des transferts d'argent, y compris les virements électroniques (E-transfer), les chèques et d'autres méthodes disponibles selon votre pays.
                 </Accordion.Body>
               </Accordion.Item>
-
               <Accordion.Item eventKey="2" onClick={() => toggleFAQ("2")}>
                 <Accordion.Header>
                   Comment est-ce que je peux transférer de l'argent?
@@ -162,4 +180,4 @@ function Joindre() {
   );
 }
 
-export default Joindre;
+export default JoinUs;

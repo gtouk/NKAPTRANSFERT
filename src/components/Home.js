@@ -52,7 +52,7 @@ const countries = {
   },
 };
 
-function Accueil() {
+function Home() {
   const { t, i18n } = useTranslation();
   const [sendCountry, setSendCountry] = useState('');
   const [receiveCountry, setReceiveCountry] = useState('');
@@ -376,4 +376,4 @@ function Accueil() {
   );
 }
 
-export default Accueil;
+export default Home;

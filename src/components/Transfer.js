@@ -63,10 +63,8 @@ function Transfer() {
   const [errorMessage, setErrorMessage] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
-  const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
   const [status, setStatus] = useState('');
-
+  const [value, setValue] = useState("");
   useEffect(() => {
   //get email from local storage
   const storedUserEmail = localStorage.getItem('email');
@@ -81,6 +79,12 @@ function Transfer() {
     console.log('Nom d\'utilisateur récupéré:', storedUserName);
   }
 }, []);
+
+const handleChange = (event) => {
+  console.log("Valeur actuelle: ", event.target.value);  // Vérifier la valeur avant la mise à jour
+  setValue(event.target.value);
+};
+
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -172,38 +176,6 @@ function Transfer() {
     }
   };
 
-  // const handleTransfer = async () => {
-  //   if (isDetailsValid()) {
-  //     setLoading(true);
-  //     try {
-  //       const response = await axios.post('/api/transfer', {
-  //         sendingCountry,
-  //         receivingCountry,
-  //         amountToSend,
-  //         amountToReceive,
-  //         withdrawalMode,
-  //         recipient,
-  //         promoCode,
-  //         firstName,
-  //         lastName,
-  //         city,
-  //         address,
-  //         phoneNumber,
-  //         isOther,
-  //       });
-
-  //       if (response.data.success) {
-  //         setActiveStep('reussi');
-  //       } else {
-  //         setError('Erreur lors du transfert. Veuillez réessayer.');
-  //       }
-  //     } catch (error) {
-  //       setError('Erreur lors du transfert. Veuillez réessayer.');
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }
-  // };
   
 
 
@@ -226,6 +198,7 @@ function Transfer() {
             </Form.Label>
             <Form.Control
               as="select"
+              name='sendCountry'
               value={sendCountry}
               onChange={(e) => setSendCountry(e.target.value)}
               aria-label={t('sendCountryLabel')}
@@ -242,6 +215,7 @@ function Transfer() {
           <Form.Group controlId="formReceiveCountry" className="form-group">
             <Form.Label
               className="form-label"
+              
               // onMouseEnter={() => speakText(t('sendToLabel'))}
               aria-label={t('sendToLabel')}
             >
@@ -250,6 +224,7 @@ function Transfer() {
             <Form.Control
             required
               as="select"
+              name='receiveCountry'
               value={receiveCountry}
               onChange={(e) => setReceiveCountry(e.target.value)}
               aria-label={t('sendToLabel')}
@@ -276,12 +251,14 @@ function Transfer() {
               <Form.Control
                 type="number"
                 name='sendAmount'
-                onChange={(e) => setSendAmount(Number(e.target.value))}
-                value={sendAmount || ''}
+                onChange={(e) => setSendAmount(parseFloat(e.target.value) || 0)}
+                value={sendAmount}
                 aria-label={t('sendAmountLabel')}
                 placeholder="Entrez le montant à envoyer"
                 required />
-              <Form.Control value='CAD'  aria-label={t('sendCurrencyLabel')}>
+              <Form.Control value='CAD' 
+              readOnly
+              aria-label={t('sendCurrencyLabel')}>
                 {/* <option>{sendCurrency}</option> */}
               </Form.Control>
               {sendAmount < 15 && (
@@ -335,7 +312,7 @@ function Transfer() {
         </h2>
         <Form noValidate validated={validated} onSubmit={handleSubmit}>
           {/* <Row className="mb-3"> */}
-          <Form.Group controlId="">
+          <Form.Group controlId="formReasonList" className="form-group">  
               <Form.Label>Raisons d'envois</Form.Label>
               <Form.Control 
               as="select"
@@ -370,7 +347,7 @@ function Transfer() {
                />
             <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
           </Form.Group>
-          <Form.Group as={Col}  controlId="validationCustom02">
+          <Form.Group as={Col}  controlId="validationCustom03">
             <Form.Label>Ville</Form.Label>
             <Form.Control
               required
@@ -381,7 +358,7 @@ function Transfer() {
                />
             <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
           </Form.Group>
-          <Form.Group as={Col}  controlId="validationCustom02">
+          <Form.Group as={Col}  controlId="validationCustom04">
             <Form.Label>Adresse du destinataire</Form.Label>
             <Form.Control
               required
@@ -392,10 +369,10 @@ function Transfer() {
                />
             <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
           </Form.Group>
-          <Form.Group as={Col}  controlId="validationCustomPhoneNum">
+          <Form.Group as={Col}  controlId="validationCustomPhoneNum1">
             <Form.Label>Numero de compte</Form.Label>
             <InputGroup hasValidation>
-              <InputGroup.Text id="inputGroupPrepend">+237</InputGroup.Text>
+              <InputGroup.Text id="inputGroupPrepend1">+237</InputGroup.Text>
               <Form.Control
                 type="tel"
                 placeholder="Numero de compte"
@@ -410,10 +387,10 @@ function Transfer() {
               </Form.Control.Feedback>
             </InputGroup>
           </Form.Group>
-          <Form.Group as={Col}  controlId="validationCustomPhoneNum">
+          <Form.Group as={Col}  controlId="validationCustomPhoneNum2">
             <Form.Label>Confirmer le Numero de compte</Form.Label>
             <InputGroup hasValidation>
-              <InputGroup.Text id="inputGroupPrepend">+237</InputGroup.Text>
+              <InputGroup.Text id="inputGroupPrepend2">+237</InputGroup.Text>
               <Form.Control
                 type="tel"
                 placeholder="Confirmer le Numero de compte"

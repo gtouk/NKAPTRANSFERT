@@ -1,146 +1,95 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Button, Col, Container, Nav, Navbar, Row } from 'react-bootstrap';
+import Modal from 'react-bootstrap/Modal';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useLocation } from 'react-router-dom';
 import '../App.css';
+import { AuthContext } from '../contexts/AuthContext';
+
 
 const Layout = ({ children }) => {
   const { t, i18n } = useTranslation();
   const location = useLocation();
-
   const [userInfo, setUserInfo] = useState(null);
   const [contactInfo, setContactInfo] = useState(null);
-  const [openingHours, setOpeningHours] = useState(null);
-  const isAuthenticated = localStorage.getItem('authToken');
-  const handleLogout = () => {
-    localStorage.removeItem('authToken'); // Supprimez le token
-    window.location.href = '/login'; // Redirigez vers la page de connexion
-};
+  const [openingHours, setOpeningHours] = useState([]);
+  const { isAuthenticated, logout } = useContext(AuthContext);
+  console.log("🟢 Layout - isAuthenticated:", isAuthenticated);
+  const [showModal, setShowModal] = useState(false); // État pour afficher le modal de confirmation
 
 
-  // Récupérer les informations utilisateur depuis l'API backend
+
   useEffect(() => {
-    fetch('/api/user')
-      .then(response => response.json())
-      .then(data => setUserInfo(data))
-      .catch(error => console.error('Erreur lors de la récupération des informations utilisateur:', error));
-
-    // Récupérer les informations de contact et horaires depuis l'API
-    fetch('/api/contact-info')
-      .then(response => response.json())
-      .then(data => setContactInfo(data))
-      .catch(error => console.error('Erreur lors de la récupération des informations de contact:', error));
-
-    fetch('/api/opening-hours')
-      .then(response => response.json())
-      .then(data => setOpeningHours(data))
-      .catch(error => console.error('Erreur lors de la récupération des horaires d\'ouverture:', error));
+    Promise.all([
+      fetch('/api/user').then(res => res.json()).then(setUserInfo),
+      fetch('/api/contact-info').then(res => res.json()).then(setContactInfo),
+      fetch('/api/opening-hours').then(res => res.json()).then(setOpeningHours),
+    ]).catch(error => console.error('Erreur lors de la récupération des données:', error));
   }, []);
 
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
-  };
+  const swapLanguage = () => i18n.changeLanguage(i18n.language === 'en' ? 'fr' : 'en');
 
-  const swapLanguage = () => {
-    if (i18n.language === 'en') {
-      changeLanguage('fr');
-    } else {
-      changeLanguage('en');
-    }
-  };
-
-  const speakText = (text) => {
+  const handleMouseEvent = (event, action) => {
     const synth = window.speechSynthesis;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = i18n.language === 'fr' ? 'fr-FR' : 'en-US';
-    const voices = synth.getVoices();
-    const selectedVoice = voices.find(voice => voice.lang === utterance.lang);
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
+    if (action === 'enter') {
+      const utterance = new SpeechSynthesisUtterance(event.target.innerText);
+      utterance.lang = i18n.language === 'fr' ? 'fr-FR' : 'en-US';
+      const voice = synth.getVoices().find(v => v.lang === utterance.lang);
+      if (voice) utterance.voice = voice;
+      synth.speak(utterance);
+    } else {
+      synth.cancel();
     }
-    synth.speak(utterance);
   };
 
-  const handleMouseEnter = (event) => {
-    speakText(event.target.innerText);
-  };
+    // Fonction pour afficher et cacher le modal de déconnexion
+    const handleShowModal = () => setShowModal(true);
+    const handleLogoutClick = async () => {
+      logout();
+      handleCloseModal();
+    };
+    const handleCloseModal = () => setShowModal(false);
 
-  const handleMouseLeave = () => {
-    window.speechSynthesis.cancel();
-  };
+  const navLinks = [
+    { path: '/home', label: t('home') },
+    { path: '/transfer', label: t('transfer') },
+    { path: '/pay', label: t('pay') },
+    { path: '/contact', label: t('contact') },
+    { path: '/history', label: t('history') },
+    { path: '/profile', label: userInfo ? userInfo.username : <i className="fas fa-user-circle"></i> },
+  ];
 
   return (
     <div>
       <Navbar bg="light" expand="lg">
         <Container fluid>
           <Navbar.Brand href="/" className="navbar-brand-custom">
-            <h1>
-              <span className="brand-highlight">NKAP</span>Transfert
-            </h1>
+            <h1><span className="brand-highlight">NKAP</span>Transfert</h1>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
-              <Nav.Link as={NavLink} to="/home" end
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                {t('home')}
-              </Nav.Link>
-              <Nav.Link as={NavLink} to="/transfer"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                {t('transfer')}
-              </Nav.Link>
-              <Nav.Link as={NavLink} to="/pay"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                {t('pay')}
-              </Nav.Link>
-              <Nav.Link as={NavLink} to="/contact"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                {t('contact')}
-              </Nav.Link>
-              <Nav.Link as={NavLink} to="/profile"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                {userInfo ? userInfo.username : <i className="fas fa-user-circle"></i>}
-              </Nav.Link>
-              <Nav.Link as={NavLink} to="/history"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                {t('history')}
-              </Nav.Link>
-
+              {navLinks.map(({ path, label }) => (
+                <Nav.Link key={path} as={NavLink} to={path}
+                  onMouseEnter={e => handleMouseEvent(e, 'enter')}
+                  onMouseLeave={e => handleMouseEvent(e, 'leave')}
+                >
+                  {label}
+                </Nav.Link>
+              ))}
               {isAuthenticated ? (
-                <Button variant="danger" onClick={handleLogout}>
-                  {t('Deconnexion')}
-                </Button>
+                <Button variant="danger" onClick={handleShowModal}>{t('Deconnexion')}</Button>
               ) : (
                 <Nav.Link as={NavLink} to="/signup"
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
+                  onMouseEnter={e => handleMouseEvent(e, 'enter')}
+                  onMouseLeave={e => handleMouseEvent(e, 'leave')}
                 >
                   {t('signup')}
                 </Nav.Link>
               )}
-
-
-              {/* <Nav.Link as={NavLink} to="/signup"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                {t('signup')}
-              </Nav.Link> */}
               <Nav.Link onClick={swapLanguage}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
+                onMouseEnter={e => handleMouseEvent(e, 'enter')}
+                onMouseLeave={e => handleMouseEvent(e, 'leave')}
               >
                 {t('english')}
               </Nav.Link>
@@ -149,53 +98,50 @@ const Layout = ({ children }) => {
         </Container>
       </Navbar>
 
-      <Container className="mt-4">
-        {children}
-      </Container>
+      <Container className="mt-4">{children}</Container>
 
-      {location.pathname === '/contact' && contactInfo && openingHours && (
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Êtes-vous sûr ?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Voulez-vous vraiment vous déconnecter ?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Annuler
+          </Button>
+          <Button variant="danger" onClick={handleLogoutClick}>
+            Confirmer
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+
+      {location.pathname === '/contact' && contactInfo && openingHours.length > 0 && (
         <footer className="text-white mt-5 p-4 text-center">
           <Container>
             <Row>
               <Col md={4} className="contact-information">
-                <h5
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
+                <h5 onMouseEnter={e => handleMouseEvent(e, 'enter')}
+                    onMouseLeave={e => handleMouseEvent(e, 'leave')}>
                   {t('contactUs')}
                 </h5>
-                <p
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <i className="fas fa-phone"></i> {contactInfo.phone}
-                </p>
-                <p
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <i className="fas fa-envelope"></i> {contactInfo.email}
-                </p>
-                <p
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <i className="fas fa-map-marker-alt"></i> {contactInfo.location}
-                </p>
+                {['phone', 'email', 'location'].map(key => (
+                  <p key={key} onMouseEnter={e => handleMouseEvent(e, 'enter')}
+                     onMouseLeave={e => handleMouseEvent(e, 'leave')}>
+                    <i className={`fas fa-${key === 'location' ? 'map-marker-alt' : key}`}></i> {contactInfo[key]}
+                  </p>
+                ))}
               </Col>
               <Col md={8} className="opening-hours">
-                <h5
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
+                <h5 onMouseEnter={e => handleMouseEvent(e, 'enter')}
+                    onMouseLeave={e => handleMouseEvent(e, 'leave')}>
                   {t('openingHours')}
                 </h5>
                 {openingHours.map((hour, index) => (
-                  <p
-                    key={index}
-                    onMouseEnter={handleMouseEnter}
-                    onMouseLeave={handleMouseLeave}
-                  >
+                  <p key={index} onMouseEnter={e => handleMouseEvent(e, 'enter')}
+                     onMouseLeave={e => handleMouseEvent(e, 'leave')}>
                     <i className="fas fa-clock"></i> {hour}
                   </p>
                 ))}

@@ -1,9 +1,11 @@
-import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { useContext } from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
-// Ce composant gère l'accès aux routes protégées en fonction de l'état d'authentification
-const PrivateRoute = ({ isAuthenticated }) => {
+const PrivateRoute = () => {
+  const { isAuthenticated } = useContext(AuthContext);
+
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
-}
+};
 
 export default PrivateRoute;

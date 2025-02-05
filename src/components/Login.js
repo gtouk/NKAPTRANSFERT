@@ -1,8 +1,9 @@
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Button, Col, Container, Form, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { AuthContext } from '../contexts/AuthContext';
 
 const LoginContainer = styled.div`
   .form-group {
@@ -23,6 +24,7 @@ const LoginContainer = styled.div`
 `;
 
 function Login({ onLoginSuccess }) {
+  const { login } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -57,7 +59,7 @@ function Login({ onLoginSuccess }) {
       localStorage.setItem('role', role);
       localStorage.setItem('email', email);
       localStorage.setItem('id', id);
-
+      login();
       alert(message || 'Connexion réussie !');
       onLoginSuccess(); // Mettre à jour l'état d'authentification si nécessaire
       // navigate('/'); // Redirection vers la page d'accueil

@@ -1,34 +1,40 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    localStorage.getItem("isAuthenticated") === "true"
+  );
   const navigate = useNavigate();
+  
 
+
+  // Vérifier l'authentification au chargement de l'application
   useEffect(() => {
-    // Vérifie si l'utilisateur est authentifié au démarrage (par exemple, via un token dans localStorage)
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      setIsAuthenticated(true);
-    }
-  }, []);
+    console.log("🔵 Auth State Updated: isAuthenticated =", isAuthenticated);
+  }, [isAuthenticated]);
 
-  const login = (token) => {
-    localStorage.setItem('authToken', token);
+  // Fonction pour gérer la connexion
+  const login = () => {
+    console.log("🟢 login() appelé !");
     setIsAuthenticated(true);
-    navigate('/'); // Redirige vers la page d'accueil après la connexion
+    localStorage.setItem("isAuthenticated", "true");
   };
 
+  // Fonction pour gérer la déconnexion
   const logout = () => {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('role');
+    localStorage.removeItem('id');
+    console.log("🟢 logout() appelé !");
     setIsAuthenticated(false);
-    navigate('/login'); // Redirige vers la page de connexion après la déconnexion
+    navigate('/login');
+    localStorage.removeItem("isAuthenticated");
   };
 
   return (

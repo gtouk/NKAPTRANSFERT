@@ -1,27 +1,31 @@
+import axios from "axios";
 import React, { useContext } from "react";
-import { useHistory } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
 const LogoutButton = () => {
     const {logout} = useContext(AuthContext);
-    const history = useHistory();
+    const navigate = useNavigate();
 
 
     const handleLogout = async () => {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('token');
         try {
-            const response = await fetch('http://localhost:3000/api/users/logout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({token}),
-            });
-
-            if (response.ok) {
-                localStorage.removeItem('authToken');
+            const response = await axios.post(
+                'http://localhost:3000/api/users/logout', 
+                { token }, // Les données vont ici
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    }
+                }
+            );
+    
+            if (response.status === 200) { // Axios utilise `status` et pas `ok`
+                // localStorage.removeItem('token');
                 logout();
-                history.push('/login');
+                navigate('/login');
             } else {
                 console.log('Erreur lors de la déconnexion');
             }
@@ -29,6 +33,7 @@ const LogoutButton = () => {
             console.log('Erreur :', error);
         }
     };
+    
 
     return (
         <button onClick={handleLogout} className="btn btn-danger">Déconnexion</button>
